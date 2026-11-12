@@ -27,17 +27,37 @@ DSH（DeepSeek Harness）插件：在 DSH 里管理多套图片生成服务，�
 
 ## 安装
 
-```bash
-dsh plugin --profile <profile> add github:shamanjin/dsh-image-studio
-```
-
-或用 Release 里的包：
+**有 dsh CLI 时**（把 `desktop` 换成你的 profile 名，通常是 `desktop` 或 `web`）：
 
 ```bash
-dsh plugin --profile <profile> add "https://github.com/shamanjin/dsh-image-studio/releases/download/v1.0.0/dsh-image-studio-1.0.0.tgz"
+dsh plugin --profile desktop add github:shamanjin/dsh-image-studio
 ```
 
-装完重启 DSH。
+也可以装 Release 里的包：
+
+```bash
+dsh plugin --profile desktop add "https://github.com/shamanjin/dsh-image-studio/releases/download/v1.0.0/dsh-image-studio-1.0.0.tgz"
+```
+
+**只有桌面版、没有 dsh CLI 时**（桌面应用不带 CLI，`dsh` 会提示命令不存在）：
+
+1. 下载 Release 里的 `dsh-image-studio-1.0.0.zip`，解压到任意目录，例如 `C:\dsh-plugins\dsh-image-studio`
+
+2. 把它链接进 profile 的 `node_modules`：
+
+   ```powershell
+   New-Item -ItemType Junction `
+     -Path "$env:USERPROFILE\.dsh\profiles\desktop\node_modules\dsh-image-studio" `
+     -Target "C:\dsh-plugins\dsh-image-studio"
+   ```
+
+3. 打开 `%USERPROFILE%\.dsh\profiles\desktop\package.json`，在 `dsh.profile.bundles` 数组里加一项 `"dsh-image-studio"`
+
+4. 重启 DSH
+
+两种方式装完都重启 DSH，然后侧栏 → 插件 → **图片工作台**。
+
+> 命令里的 `<profile>` 是占位符，要替换成实际 profile 名再执行；PowerShell 里 `<` 是保留字符，原样粘贴会报「`<`运算符是为将来使用而保留的」。
 
 ## 使用
 
