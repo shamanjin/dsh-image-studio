@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>dsh-image-studio 样式预览</title>
+<style>
+  :root {
+    --dsw-alias-label-primary: #e9e9ec;
+    --dsw-alias-label-secondary: #b6b6bd;
+    --dsw-alias-label-tertiary: #8b8b93;
+    --dsw-alias-border-l2: rgba(255, 255, 255, 0.08);
+    --dsw-alias-border-l4: rgba(255, 255, 255, 0.16);
+    --dsw-alias-bg-layer-3: #232327;
+    --dsw-alias-interactive-bg-hover: rgba(255, 255, 255, 0.06);
+    --dsw-alias-state-business-primary: #4a7dff;
+    --dsw-alias-state-error-primary: #ff6b6b;
+    --dsw-radius-md: 8px;
+    --dsw-radius-sm: 6px;
+    --dsw-focus-ring-width: 2px;
+  }
+  body { margin: 0; padding: 40px; background: #17171a; color: var(--dsw-alias-label-primary);
+    font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; }
+  .pane { width: 720px; }
+  .pane h2 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+  .pane p.sub { margin: 0 0 18px; font-size: 12px; color: var(--dsw-alias-label-tertiary); }
+  .section-title { margin: 34px 0 12px; font-size: 12px; color: var(--dsw-alias-label-tertiary); }
+
+  /* ---- 与 lib/client.js 注入的 CSS 一致 ---- */
+  .dshig{display:flex;flex-direction:column;gap:10px}
+  .dshig_grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+  .dshig_tile{display:flex;flex-direction:column;gap:6px;padding:12px;border:0.5px solid var(--dsw-alias-border-l4);border-radius:var(--dsw-radius-md);background:transparent;text-align:left;cursor:pointer;font:inherit;color:var(--dsw-alias-label-primary);min-width:0}
+  .dshig_tile:hover{background:var(--dsw-alias-interactive-bg-hover)}
+  .dshig_tile_active{border-color:var(--dsw-alias-state-business-primary)}
+  .dshig_tile_add{align-items:center;justify-content:center;border-style:dashed;color:var(--dsw-alias-label-tertiary);min-height:104px}
+  .dshig_tile_head{display:flex;align-items:center;gap:6px;min-width:0}
+  .dshig_tile_name{flex:1;min-width:0;font-size:13px;font-weight:600;line-height:1.4;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dshig_tile_line{margin:0;font-size:12px;line-height:1.5;color:var(--dsw-alias-label-tertiary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .dshig_tile_foot{display:flex;align-items:center;gap:8px;margin-top:2px}
+  .dshig_link{border:none;background:none;padding:0;font:inherit;font-size:12px;line-height:1.5;color:var(--dsw-alias-label-secondary);cursor:pointer}
+  .dshig_empty{margin:0;font-size:12px;line-height:1.5;color:var(--dsw-alias-label-tertiary)}
+  .dshig_field{display:flex;flex-direction:column;gap:6px;padding:8px 0}
+  .dshig_field + .dshig_field{border-top:0.5px solid var(--dsw-alias-border-l2)}
+  .dshig_head{display:flex;align-items:center;gap:8px}
+  .dshig_label{flex:1;min-width:0;font-size:13px;font-weight:500;line-height:1.5;color:var(--dsw-alias-label-primary)}
+  .dshig_badges{display:inline-flex;align-items:center;gap:8px;flex:none}
+  .dshig_input{height:34px;padding:0 12px;border:0.5px solid var(--dsw-alias-border-l4);border-radius:var(--dsw-radius-md);background:var(--dsw-alias-bg-layer-3);font:inherit;font-size:13px;line-height:1.5;color:var(--dsw-alias-label-primary);min-width:0;width:100%;box-sizing:border-box}
+  .dshig_input::placeholder{color:var(--dsw-alias-label-tertiary)}
+  .dshig_select{appearance:none;padding-right:28px;background-image:linear-gradient(45deg,transparent 50%,var(--dsw-alias-label-tertiary) 50%),linear-gradient(135deg,var(--dsw-alias-label-tertiary) 50%,transparent 50%);background-position:calc(100% - 15px) 15px,calc(100% - 10px) 15px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;cursor:pointer}
+  .dshig_row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .dshig_grow{flex:1 1 180px;min-width:0}
+  .dshig_select_narrow{width:220px;flex:none}
+  .dshig_ok{margin:0;font-size:12px;line-height:1.5;color:var(--dsw-alias-label-secondary)}
+  .dshig_foot{display:flex;align-items:center;gap:8px;width:100%}
+  .dshig_spacer{flex:1;min-width:0}
+  .dshig_foot_status{font-size:12px;line-height:1.5;color:var(--dsw-alias-label-tertiary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:320px}
+  .dshig_primary{appearance:none;border:1px solid transparent;border-radius:var(--dsw-radius-md);padding:5px 14px;font:inherit;font-size:13px;line-height:1.5;cursor:pointer;background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-layer-3)}
+  .dshig_cols{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+  .dshig_cols > .dshig_field{border-top:0}
+  .dshig_modal{width:700px;max-width:94vw}
+  .btn{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;gap:4px;border:none;border-radius:var(--dsw-radius-sm);cursor:pointer;font:inherit;height:28px;font-size:12px;line-height:18px;padding:0 10px;color:var(--dsw-alias-label-primary);background:transparent;flex:none}
+  .btn:hover:not(:disabled){background:var(--dsw-alias-interactive-bg-hover)}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .tag{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:999px;font-size:11px;line-height:1;color:var(--dsw-alias-label-secondary);background:rgba(255,255,255,.06);white-space:nowrap}
+  .tag.quiet{color:var(--dsw-alias-label-tertiary);background:transparent;box-shadow:inset 0 0 0 0.5px var(--dsw-alias-border-l4)}
+
+  /* 预览用的弹窗外框（真实界面为 Modal 组件） */
+  .mock-modal{width:700px;max-width:94vw;border:0.5px solid var(--dsw-alias-border-l4);border-radius:var(--dsw-radius-md);background:#1d1d21;padding:16px 20px;box-shadow:0 20px 60px rgba(0,0,0,.55)}
+  .mock-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px}
+  .mock-title{margin:0;font-size:14px;font-weight:600}
+  .mock-close{border:none;background:none;color:var(--dsw-alias-label-tertiary);cursor:pointer;font-size:14px}
+  .mock-foot{display:flex;align-items:center;gap:8px;padding-top:14px}
+  .note{margin-top:28px;font-size:12px;line-height:1.6;color:var(--dsw-alias-label-tertiary)}
+</style>
+</head>
+<body>
+<div class="pane">
+  <h2>图片工作台</h2>
+  <p class="sub">管理图片工作台服务配置：点击方块切换当前使用，出图请求将使用当前配置。支持任意 OpenAI 兼容接口与模型。</p>
+
+  <div class="dshig">
+    <div class="dshig_grid">
+      <div class="dshig_tile dshig_tile_active">
+        <div class="dshig_tile_head"><span class="dshig_tile_name">生产网关</span><span class="tag">使用中</span></div>
+        <p class="dshig_tile_line">api.example.com</p>
+        <p class="dshig_tile_line">gpt-image-2.6-sunburst</p>
+        <div class="dshig_tile_foot"><span class="tag">已存 Key</span><button class="dshig_link">编辑配置</button></div>
+      </div>
+      <div class="dshig_tile">
+        <div class="dshig_tile_head"><span class="dshig_tile_name">备用服务</span></div>
+        <p class="dshig_tile_line">api.example.com</p>
+        <p class="dshig_tile_line">未指定模型</p>
+        <div class="dshig_tile_foot"><span class="tag quiet">未存 Key</span><button class="dshig_link">编辑配置</button></div>
+      </div>
+      <button class="dshig_tile dshig_tile_add">
+        <span style="font-size:18px;line-height:1">+</span><span style="font-size:12px">添加配置</span>
+      </button>
+    </div>
+  </div>
+
+  <p class="section-title">首次安装：只有提示和「+ 添加配置」。打开弹窗后提示仍保留，直到真正保存了配置</p>
+
+  <div class="dshig">
+    <p class="dshig_empty">尚未添加配置。</p>
+    <div class="dshig_grid">
+      <button class="dshig_tile dshig_tile_add">
+        <span style="font-size:18px;line-height:1">+</span><span style="font-size:12px">添加配置</span>
+      </button>
+    </div>
+  </div>
+
+  <p class="section-title">已有配置：点「+」或「编辑配置」→ 宽版弹窗，模型填选同行，底部统一保存</p>
+
+  <div class="mock-modal dshig_modal">
+    <div class="mock-head">
+      <h3 class="mock-title">添加配置</h3>
+      <button class="mock-close">✕</button>
+    </div>
+
+    <div class="dshig_cols">
+      <div class="dshig_field">
+        <div class="dshig_head"><label class="dshig_label">名称</label></div>
+        <input class="dshig_input" placeholder="例如：生产网关" />
+      </div>
+      <div class="dshig_field">
+        <div class="dshig_head"><label class="dshig_label">输出目录</label></div>
+        <input class="dshig_input" placeholder="默认为工作目录下 /dsh_outputs/images" />
+      </div>
+    </div>
+
+    <div class="dshig_field">
+      <div class="dshig_head"><label class="dshig_label">接口地址</label></div>
+      <input class="dshig_input" placeholder="https://api.example.com/v1" />
+    </div>
+
+    <div class="dshig_field">
+      <div class="dshig_head">
+        <label class="dshig_label">API Key</label>
+        <span class="dshig_badges"><span class="tag">已保存密钥</span></span>
+      </div>
+      <input class="dshig_input" type="password" placeholder="sk-…" />
+    </div>
+
+    <div class="dshig_field">
+      <div class="dshig_head"><label class="dshig_label">模型</label></div>
+      <div class="dshig_row">
+        <input class="dshig_input dshig_grow" placeholder="选择或输入模型 ID" />
+        <select class="dshig_input dshig_select dshig_select_narrow">
+          <option>选择模型…</option>
+          <option>gpt-image-2.6-sunburst · $0.1333</option>
+          <option>gpt-image-2.6-flare · $0.1333</option>
+        </select>
+        <button class="btn">获取模型</button>
+      </div>
+      <p class="dshig_ok">4 个模型可用，其中 4 个为图像模型，已置顶</p>
+    </div>
+
+    <div class="mock-foot">
+      <button class="btn">删除</button>
+      <button class="btn">测试连接</button>
+      <span class="dshig_foot_status">● 连接正常 · 289ms · 4 个模型可用</span>
+      <span class="dshig_spacer"></span>
+      <button class="btn">取消</button>
+      <button class="dshig_primary">保存</button>
+    </div>
+  </div>
+
+  <p class="note">
+    静态预览：间距/字号/边框取自 DSH 设置页 design token，Button / Tag / Modal 按官方 CSS module 近似还原。
+    首次安装时没有任何配置，只显示「+ 添加配置」方块。
+  </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,9 @@
+# dsh-image-studio 的 bundle patch：把自己挂进 DSH 配置树
+#
+# 说明：
+#   - insert 往配置树里添加一行 entry
+#   - id 是行标识（patch 覆盖时按它定位），name 是宿主模块名
+#   - 本行不要写行尾注释
+- insert:
+    - id: dsh-image-studio
+      name: 'dsh-image-studio'

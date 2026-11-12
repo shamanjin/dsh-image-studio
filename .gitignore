@@ -1,0 +1,16 @@
+# 依赖与构建产物
+node_modules/
+test/node_modules/
+
+# 打包产物（用 npm pack / 发布 Release 生成，不入库）
+*.tgz
+*.zip
+
+# 本地临时文件
+*.log
+.DS_Store
+Thumbs.db
+
+# 本地配置（含密钥，绝不入库）
+config.json
+.credentials.yaml
