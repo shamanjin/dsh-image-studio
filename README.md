@@ -30,6 +30,10 @@ DSH（DeepSeek Harness）插件：在 DSH 里管理多套图片生成服务，�
 **有 dsh CLI 时**（把 `desktop` 换成你的 profile 名，通常是 `desktop` 或 `web`）：
 
 ```bash
+# 从 npm 装（推荐，预构建、无需构建授权）
+dsh plugin --profile desktop add @shamanjin/dsh-image-studio
+
+# 或直接从 GitHub 仓库装
 dsh plugin --profile desktop add github:shamanjin/dsh-image-studio
 ```
 
@@ -43,15 +47,16 @@ dsh plugin --profile desktop add "https://github.com/shamanjin/dsh-image-studio/
 
 1. 下载 Release 里的 `dsh-image-studio-1.0.0.zip`，解压到任意目录，例如 `C:\dsh-plugins\dsh-image-studio`
 
-2. 把它链接进 profile 的 `node_modules`：
+2. 把它链接进 profile 的 `node_modules`（注意包名带作用域，目录嵌在 `@shamanjin` 下）：
 
    ```powershell
+   New-Item -ItemType Directory "$env:USERPROFILE\.dsh\profiles\desktop\node_modules\@shamanjin" -Force
    New-Item -ItemType Junction `
-     -Path "$env:USERPROFILE\.dsh\profiles\desktop\node_modules\dsh-image-studio" `
+     -Path "$env:USERPROFILE\.dsh\profiles\desktop\node_modules\@shamanjin\dsh-image-studio" `
      -Target "C:\dsh-plugins\dsh-image-studio"
    ```
 
-3. 打开 `%USERPROFILE%\.dsh\profiles\desktop\package.json`，在 `dsh.profile.bundles` 数组里加一项 `"dsh-image-studio"`
+3. 打开 `%USERPROFILE%\.dsh\profiles\desktop\package.json`，在 `dsh.profile.bundles` 数组里加一项 `"@shamanjin/dsh-image-studio"`
 
 4. 重启 DSH
 

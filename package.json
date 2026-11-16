@@ -1,7 +1,9 @@
 {
-  "name": "dsh-image-studio",
+  "name": "@shamanjin/dsh-image-studio",
   "version": "1.0.0",
-  "private": true,
+  "publishConfig": {
+    "access": "public"
+  },
   "description": "图片工作台插件：管理多套 OpenAI 兼容的生图服务配置（接口地址、API Key、模型、输出目录），支持文生图与图生图，并提供 image_generate 工具。",
   "keywords": [
     "dsh",

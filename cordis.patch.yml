@@ -6,4 +6,4 @@
 #   - 本行不要写行尾注释
 - insert:
     - id: dsh-image-studio
-      name: 'dsh-image-studio'
+      name: '@shamanjin/dsh-image-studio'
