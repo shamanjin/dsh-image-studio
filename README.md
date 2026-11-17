@@ -91,6 +91,7 @@ dsh plugin --profile desktop add "https://github.com/shamanjin/dsh-image-studio/
 | 输出目录 | 留空时保存到当前工作目录下的 `dsh_outputs/images` |
 | 密钥存放 | `~/.dsh/.credentials.yaml`，配置文件里只有引用名 |
 | 生效范围 | 只使用当前选中的那套配置，模型侧无法改地址、Key 或模型 |
+| 本地接口 | `/dsh-image-studio/*` 只接受本机 Host、同源请求与 `application/json`；网页跨站调用会被拒 |
 
 ## License
 

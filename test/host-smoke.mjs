@@ -49,7 +49,11 @@ const ctx = {
     callback(child);
     return () => {};
   },
-  webServer: { register: (r) => { routes.push(r); return () => {}; } },
+  webServer: {
+    register: (r) => { routes.push(r); return () => {}; },
+    getOrigin: () => 'http://127.0.0.1:12345',
+    port: 12345,
+  },
   credentials: {
     async resolve(ref) {
       return apiKey ? { value: apiKey, source: 'test' } : undefined;
@@ -72,11 +76,18 @@ console.log('prompt sections:', sections.map((s) => `${s.name}@${s.order}`).join
 
 const route = routes[0];
 
-async function call(method, url, body) {
+async function call(method, url, body, options = {}) {
   const chunks = body === undefined ? [] : [Buffer.from(JSON.stringify(body))];
+  const headers = {
+    host: options.host ?? '127.0.0.1:12345',
+    ...(body === undefined ? {} : { 'content-type': options.contentType ?? 'application/json' }),
+    ...(options.origin === undefined ? {} : { origin: options.origin }),
+    ...(options.site === undefined ? {} : { 'sec-fetch-site': options.site }),
+  };
   const req = {
     method,
     url,
+    headers,
     async *[Symbol.asyncIterator]() { for (const c of chunks) yield c; },
   };
   let status = 0;
@@ -111,6 +122,21 @@ console.log('hasKey reported ->', saved.payload.profiles?.[0]?.hasKey, '(应为 
 const models = await call('POST', '/dsh-image-studio/models', { baseUrl: profile.baseUrl, apiKeyRef: profile.apiKeyRef });
 console.log('POST /models ->', models.status, 'ok:', models.payload.ok, 'count:', models.payload.models?.length,
   '| first:', models.payload.models?.[0]?.id);
+
+// ---- 安全检查：跨站调用必须被拒 ----
+const crossOrigin = await call('POST', '/dsh-image-studio/state', { profiles: [] }, { origin: 'https://evil.example' });
+const foreignHost = await call('GET', '/dsh-image-studio/state', undefined, { host: 'evil.example:12345' });
+const crossSite = await call('POST', '/dsh-image-studio/state', { profiles: [] }, { site: 'cross-site' });
+const plainText = await call('POST', '/dsh-image-studio/state', { profiles: [] }, { contentType: 'text/plain' });
+const sameOrigin = await call('POST', '/dsh-image-studio/state', { profiles: [profile], activeId: profile.id }, { origin: 'http://127.0.0.1:12345' });
+
+const problems = [];
+if (crossOrigin.status !== 403) problems.push(`跨站 Origin 未被拒（${crossOrigin.status}）`);
+if (foreignHost.status !== 403) problems.push(`外站 Host 未被拒（${foreignHost.status}）`);
+if (crossSite.status !== 403) problems.push(`cross-site 未被拒（${crossSite.status}）`);
+if (plainText.status !== 415) problems.push(`非 JSON POST 未被拒（${plainText.status}）`);
+if (sameOrigin.status !== 200) problems.push(`同源请求被误拒（${sameOrigin.status}）`);
+console.log('安全校验 ->', problems.length ? 'PROBLEMS: ' + problems.join('; ') : '跨站/外站/表单/同源 全部符合预期');
 
 const test = await call('POST', '/dsh-image-studio/test', { baseUrl: profile.baseUrl, model: profile.model, apiKeyRef: profile.apiKeyRef });
 console.log('POST /test ->', test.status, JSON.stringify(test.payload));
