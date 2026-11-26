@@ -46,6 +46,18 @@ const ctx = {
         },
       };
     }
+    if (services.includes('connection')) {
+      // 模拟平台访问检查：host 是 evil 或 origin 跨站 → 403；没有会话头 → 401
+      child.connection = {
+        requestRejection(request) {
+          const host = String(request.headers?.host || '');
+          if (host.startsWith('evil.')) return 403;
+          if (request.headers?.origin && !String(request.headers.origin).includes('127.0.0.1')) return 403;
+          if (request.headers?.['x-test-session'] === 'none') return 401;
+          return undefined;
+        },
+      };
+    }
     callback(child);
     return () => {};
   },
@@ -83,6 +95,7 @@ async function call(method, url, body, options = {}) {
     ...(body === undefined ? {} : { 'content-type': options.contentType ?? 'application/json' }),
     ...(options.origin === undefined ? {} : { origin: options.origin }),
     ...(options.site === undefined ? {} : { 'sec-fetch-site': options.site }),
+    ...(options.session === undefined ? {} : { 'x-test-session': options.session }),
   };
   const req = {
     method,
@@ -123,20 +136,26 @@ const models = await call('POST', '/dsh-image-studio/models', { baseUrl: profile
 console.log('POST /models ->', models.status, 'ok:', models.payload.ok, 'count:', models.payload.models?.length,
   '| first:', models.payload.models?.[0]?.id);
 
-// ---- 安全检查：跨站调用必须被拒 ----
-const crossOrigin = await call('POST', '/dsh-image-studio/state', { profiles: [] }, { origin: 'https://evil.example' });
-const foreignHost = await call('GET', '/dsh-image-studio/state', undefined, { host: 'evil.example:12345' });
+// ---- 安全检查：平台层（ctx.connection.requestRejection）----
+const platformHost = await call('GET', '/dsh-image-studio/state', undefined, { host: 'evil.rebind.example:12345' });
+const platformOrigin = await call('POST', '/dsh-image-studio/state', { profiles: [] }, { origin: 'https://evil.example' });
+const platformNoSession = await call('GET', '/dsh-image-studio/state', undefined, { session: 'none' });
+
+// ---- 安全检查：兜底层（平台服务缺失时的自定义校验）----
 const crossSite = await call('POST', '/dsh-image-studio/state', { profiles: [] }, { site: 'cross-site' });
 const plainText = await call('POST', '/dsh-image-studio/state', { profiles: [] }, { contentType: 'text/plain' });
 const sameOrigin = await call('POST', '/dsh-image-studio/state', { profiles: [profile], activeId: profile.id }, { origin: 'http://127.0.0.1:12345' });
 
 const problems = [];
-if (crossOrigin.status !== 403) problems.push(`跨站 Origin 未被拒（${crossOrigin.status}）`);
-if (foreignHost.status !== 403) problems.push(`外站 Host 未被拒（${foreignHost.status}）`);
+if (platformHost.status !== 403) problems.push(`平台 Host 围栏未生效（${platformHost.status}）`);
+if (platformOrigin.status !== 403) problems.push(`平台 Origin 围栏未生效（${platformOrigin.status}）`);
+if (platformNoSession.status !== 401) problems.push(`未认证会话未被拒（${platformNoSession.status}）`);
 if (crossSite.status !== 403) problems.push(`cross-site 未被拒（${crossSite.status}）`);
 if (plainText.status !== 415) problems.push(`非 JSON POST 未被拒（${plainText.status}）`);
 if (sameOrigin.status !== 200) problems.push(`同源请求被误拒（${sameOrigin.status}）`);
-console.log('安全校验 ->', problems.length ? 'PROBLEMS: ' + problems.join('; ') : '跨站/外站/表单/同源 全部符合预期');
+console.log('安全校验 ->', problems.length
+  ? 'PROBLEMS: ' + problems.join('; ')
+  : '平台 403/403/401 + 兜底 403/415/同源 200 全部符合预期');
 
 const test = await call('POST', '/dsh-image-studio/test', { baseUrl: profile.baseUrl, model: profile.model, apiKeyRef: profile.apiKeyRef });
 console.log('POST /test ->', test.status, JSON.stringify(test.payload));
